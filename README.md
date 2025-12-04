@@ -39,15 +39,15 @@ The server offers the following tools:
 ## Setup
 
 1.  **Configure Facebook Credentials:**
-    * Create a `.env` file in the root directory of your project.
-    * Add your Facebook Page access token and Page ID to the `.env` file:
+    * Copy `.env.example` to `.env` in the project root.
+    * Update the values with your Facebook Page access token and Page ID:
 
-        ```
-        FACEBOOK_PAGE_ACCESS_TOKEN=YOUR_PAGE_ACCESS_TOKEN
-        FACEBOOK_PAGE_ID=YOUR_PAGE_ID
-        ```
+      ```
+      FACEBOOK_PAGE_ACCESS_TOKEN=YOUR_PAGE_ACCESS_TOKEN
+      FACEBOOK_PAGE_ID=YOUR_PAGE_ID
+      ```
 
-    * Replace `YOUR_PAGE_ACCESS_TOKEN` and `YOUR_PAGE_ID` with your actual values.
+    * The server now fails fast with a clear error if either variable is missing, so you’ll know immediately when the config isn’t set.
     * **Important:** Add `.env` to your `.gitignore` to avoid committing sensitive information.
 
 2.  **Configure in Claude Desktop (or your MCP Client):**
@@ -61,7 +61,7 @@ The server offers the following tools:
                   "command": "uv",
                   "args": [
                       "--directory",
-                      "/path/to/facebook-mcp-server",
+                      "/Users/kapilthakare/Projects/facebook-mcp-server",
                       "run",
                       "facebook-mcp-server"  
                   ]
@@ -69,6 +69,7 @@ The server offers the following tools:
           }
         }
         ```
+        * Update the `--directory` path if your clone lives somewhere else.
 
 
 ## Building

@@ -1,15 +1,15 @@
 import asyncio
+import logging
 import os
 import sys
-import logging
+from typing import Any
+
+import mcp.server.stdio
 import requests
+from dotenv import load_dotenv
+from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
 import mcp.types as types
-from mcp.server import NotificationOptions, Server
-import mcp.server.stdio
-from pydantic import AnyUrl
-from typing import Any
-from dotenv import load_dotenv
 
 
 # Load environment variables from .env file
@@ -21,24 +21,49 @@ if sys.platform == "win32" and os.environ.get('PYTHONIOENCODING') is None:
     sys.stdout.reconfigure(encoding="utf-8")
     sys.stderr.reconfigure(encoding="utf-8")
 
+# Configure basic logging for easier debugging inside MCP clients
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+)
 logger = logging.getLogger('facebook_mcp_server')
 logger.info("Starting Facebook MCP Server")
-
-# Replace with your Facebook Page access token and Page ID
-PAGE_ACCESS_TOKEN = os.environ.get("FACEBOOK_PAGE_ACCESS_TOKEN")
-PAGE_ID = os.environ.get("FACEBOOK_PAGE_ID")
 
 # Facebook Graph API endpoint
 GRAPH_API_VERSION = "v18.0"
 GRAPH_API_BASE_URL = f"https://graph.facebook.com/{GRAPH_API_VERSION}"
 
+
+def load_facebook_config() -> tuple[str, str]:
+    """Ensure required Facebook credentials are present."""
+    page_access_token = os.environ.get("FACEBOOK_PAGE_ACCESS_TOKEN")
+    page_id = os.environ.get("FACEBOOK_PAGE_ID")
+
+    missing = [name for name, value in {
+        "FACEBOOK_PAGE_ACCESS_TOKEN": page_access_token,
+        "FACEBOOK_PAGE_ID": page_id,
+    }.items() if not value]
+
+    if missing:
+        raise RuntimeError(
+            f"Missing required environment variable(s): {', '.join(missing)}. "
+            "Set them in a .env file or your shell before starting the server."
+        )
+
+    return page_id, page_access_token
+
+
 class FacebookManager:
+    def __init__(self, page_id: str, access_token: str) -> None:
+        self.page_id = page_id
+        self.access_token = access_token
+
     def post_to_facebook(self, message: str) -> dict[str, Any]:
         """Posts a message to the Facebook Page."""
-        url = f"{GRAPH_API_BASE_URL}/{PAGE_ID}/feed"
+        url = f"{GRAPH_API_BASE_URL}/{self.page_id}/feed"
         params = {
             "message": message,
-            "access_token": PAGE_ACCESS_TOKEN,
+            "access_token": self.access_token,
         }
         response = requests.post(url, params=params)
         return response.json()
@@ -48,16 +73,16 @@ class FacebookManager:
         url = f"{GRAPH_API_BASE_URL}/{comment_id}/comments"
         params = {
             "message": message,
-            "access_token": PAGE_ACCESS_TOKEN,
+            "access_token": self.access_token,
         }
         response = requests.post(url, params=params)
         return response.json()
 
     def get_page_posts(self) -> dict[str, Any]:
         """Retrieves posts published on the Facebook Page."""
-        url = f"{GRAPH_API_BASE_URL}/{PAGE_ID}/posts"
+        url = f"{GRAPH_API_BASE_URL}/{self.page_id}/posts"
         params = {
-            "access_token": PAGE_ACCESS_TOKEN,
+            "access_token": self.access_token,
             "fields": "id,message,created_time",
         }
         response = requests.get(url, params=params)
@@ -67,7 +92,7 @@ class FacebookManager:
         """Retrieves comments for a specific post."""
         url = f"{GRAPH_API_BASE_URL}/{post_id}/comments"
         params = {
-            "access_token": PAGE_ACCESS_TOKEN,
+            "access_token": self.access_token,
             "fields": "id,message,from,created_time",
         }
         response = requests.get(url, params=params)
@@ -90,7 +115,7 @@ class FacebookManager:
         """Deletes a post from the Facebook Page."""
         url = f"{GRAPH_API_BASE_URL}/{post_id}"
         params = {
-            "access_token": PAGE_ACCESS_TOKEN,
+            "access_token": self.access_token,
         }
         response = requests.delete(url, params=params)
         return response.json()
@@ -99,7 +124,7 @@ class FacebookManager:
         """Deletes a comment from a post."""
         url = f"{GRAPH_API_BASE_URL}/{comment_id}"
         params = {
-            "access_token": PAGE_ACCESS_TOKEN,
+            "access_token": self.access_token,
         }
         response = requests.delete(url, params=params)
         return response.json()
@@ -107,7 +132,13 @@ class FacebookManager:
 async def main():
     logger.info("Starting Facebook MCP Server")
 
-    fb_manager = FacebookManager()
+    try:
+        page_id, page_access_token = load_facebook_config()
+    except RuntimeError as exc:
+        logger.error(str(exc))
+        raise
+
+    fb_manager = FacebookManager(page_id=page_id, access_token=page_access_token)
     server = Server("facebook-manager")
 
     # Register handlers
