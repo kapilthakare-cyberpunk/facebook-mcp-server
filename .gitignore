@@ -9,9 +9,24 @@ wheels/
 # Virtual environments
 .venv
 
-# Environment variables
+# Environment variables - CRITICAL: Never commit these!
 .env
+.env.facebook
+.env.linkedin
+.env.telegram
+*.env.local
+*.env.*.local
 
 # System files
 .DS_Store
 **/.DS_Store
+
+# Docker volumes (if using local volumes)
+data/
+*/data/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

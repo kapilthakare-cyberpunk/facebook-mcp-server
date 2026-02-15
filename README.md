@@ -1,82 +1,169 @@
-# Facebook MCP Server
+# Social Media MCP Servers
 <img src="https://badge.mcpx.dev?type=server" title="MCP Server"/>
 
-## Overview
+Production-ready MCP servers for **Facebook, Instagram, LinkedIn, and Telegram** with full support for images, carousels, links, and hashtags.
 
-A Model Context Protocol (MCP) server implementation that provides Facebook Page interaction and management capabilities. This server enables automated posting, comment moderation, and content retrieval.
+## 🚀 Quick Start
 
-## Components
+```bash
+# 1. Set up credentials
+cp .env.facebook.example .env.facebook  # Edit with your tokens
+cp .env.linkedin.example .env.linkedin  # Edit with your tokens
+cp .env.telegram.example .env.telegram  # Edit with your tokens
 
-## Tools
+# 2. Run with Docker Compose (RECOMMENDED)
+docker-compose up -d
 
-The server offers the following tools:
+# 3. View logs
+docker-compose logs -f
+```
 
-* **post_to_facebook:**
-    * Posts a message to the Facebook Page.
-    * Input: `message` (string): The message to post.
-* **reply_to_comment:**
-    * Replies to a comment on a specific post.
-    * Input:
-        * `post_id` (string): The ID of the post.
-        * `comment_id` (string): The ID of the comment.
-        * `message` (string): The reply message.
-* **get_page_posts:**
-    * Retrieves posts published on the Facebook Page.
-    * Input: None.
-* **get_post_comments:**
-    * Retrieves comments for a specific post.
-    * Input: `post_id` (string): The ID of the post.
-* **filter_negative_comments:**
-    * Filters negative comments from a post based on keywords.
-    * Input: `post_id` (string): The ID of the post.
-* **delete_post:**
-    * Deletes a post from the Facebook Page.
-    * Input: `post_id` (string): The ID of the post to delete.
-* **delete_comment:**
-    * Deletes a comment from a post.
-    * Input: `comment_id` (string): The ID of the comment to delete.
+**That's it!** Your servers are running and credentials are safely stored.
 
-## Setup
+## 📋 Features
 
-1.  **Configure Facebook Credentials:**
-    * Copy `.env.example` to `.env` in the project root.
-    * Update the values with your Facebook Page access token and Page ID:
+### Facebook & Instagram
+- ✅ Text, image, carousel, video, reel posts
+- ✅ Cross-post to both platforms
+- ✅ Hashtag support
+- ✅ Comment management
+- ✅ Post moderation
 
-      ```
-      FACEBOOK_PAGE_ACCESS_TOKEN=YOUR_PAGE_ACCESS_TOKEN
-      FACEBOOK_PAGE_ID=YOUR_PAGE_ID
-      ```
+### LinkedIn
+- ✅ Text posts with hashtags
+- ✅ Single image posts
+- ✅ Carousel posts (2-10 images)
+- ✅ Article/link sharing
+- ✅ Comment management
 
-    * The server now fails fast with a clear error if either variable is missing, so you’ll know immediately when the config isn’t set.
-    * **Important:** Add `.env` to your `.gitignore` to avoid committing sensitive information.
+### Telegram
+- ✅ Text messages with hashtags
+- ✅ Single photo posts
+- ✅ Media groups (carousels, 2-10 photos)
+- ✅ Link previews
+- ✅ Bot updates
 
-2.  **Configure in Claude Desktop (or your MCP Client):**
-    * Configure your MCP client (e.g., Claude Desktop) to connect to the Facebook MCP server.
-    * Example configuration for Claude Desktop (uv):
+## 🔧 What Makes This Special
 
-        ```json
-        {
-          "mcpServers": {
-              "facebook": {
-                  "command": "uv",
-                  "args": [
-                      "--directory",
-                      "/Users/kapilthakare/Projects/facebook-mcp-server",
-                      "run",
-                      "facebook-mcp-server"  
-                  ]
-              }
-          }
-        }
-        ```
-        * Update the `--directory` path if your clone lives somewhere else.
+**For Semi-Advanced Vibe Coders:**
+- ✅ **No Breaking Changes**: Docker isolation protects your setup
+- ✅ **Config Persistence**: Update credentials without rebuilding
+- ✅ **Exact Working Fix**: All tools tested and functional
+- ✅ **Hashtag Support**: Built-in for all platforms
+- ✅ **Straightforward API**: Simple, consistent tool interfaces
 
+## 📖 Documentation
 
-## Building
+- **[SETUP_GUIDE.md](SETUP_GUIDE.md)** - Complete setup and usage guide
+- **[get-AppID-secret-long-short-lived-tokens-process.md](get-AppID-secret-long-short-lived-tokens-process.md)** - Facebook/Instagram credentials
 
-Comming Next.
+## 🎯 Common Use Cases
 
+### Post across all platforms
+```bash
+# Same content, different platforms
+linkedin_create_image_post(text="New product!", image_url="...", hashtags=["launch"])
+post_media(caption="New product!", media_urls=["..."], media_type="image", platforms=["facebook", "instagram"])
+telegram_send_photo(photo_url="...", caption="New product!", hashtags=["launch"])
+```
 
-## License
+### Share article/link
+```bash
+linkedin_create_link_post(text="Must read", link_url="...", hashtags=["article"])
+telegram_send_link(text="Must read", link_url="...", hashtags=["article"])
+# Facebook: Use post_to_facebook with link in text
+```
 
-This MCP server is licensed under the MIT License. This means you are free to use, modify, and distribute the software, subject to the terms and conditions of the MIT License. For more details, please see the LICENSE file in the project repository.
+### Carousel posts
+```bash
+linkedin_create_carousel_post(text="...", image_urls=[...], hashtags=["..."])
+post_media(caption="...", media_urls=[...], media_type="carousel", platforms=["facebook"])
+telegram_send_media_group(media_urls=[...], caption="...", hashtags=["..."])
+```
+
+## 🐳 Docker Management
+
+```bash
+# Start all servers
+docker-compose up -d
+
+# Start specific server
+docker-compose up -d facebook
+
+# View logs
+docker-compose logs -f linkedin
+
+# Restart after config change (NO REBUILD NEEDED!)
+docker-compose restart telegram
+
+# Stop all
+docker-compose down
+
+# Rebuild after code changes
+docker-compose build
+docker-compose up -d
+```
+
+## 🔐 Config Persistence
+
+Your credentials are:
+- ✅ Stored in separate `.env.facebook`, `.env.linkedin`, `.env.telegram` files
+- ✅ Mounted at runtime (not baked into images)
+- ✅ Safe to update without rebuilding containers
+- ✅ Gitignored by default
+
+**To update credentials:**
+1. Edit the `.env.*` file
+2. Run `docker-compose restart <service>`
+3. Done!
+
+## 🛠️ Local Development
+
+```bash
+# Install dependencies
+uv sync
+
+# Run servers locally
+uv run facebook-mcp-server
+uv run linkedin-mcp-server
+uv run telegram-mcp-server
+```
+
+## 📦 MCP Client Config
+
+For Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "facebook": {
+      "command": "docker",
+      "args": ["run", "--rm", "-i", "--env-file", "/path/to/project/.env.facebook", "facebook-mcp-server:latest"]
+    },
+    "linkedin": {
+      "command": "docker",
+      "args": ["run", "--rm", "-i", "--env-file", "/path/to/project/.env.linkedin", "linkedin-mcp-server:latest"]
+    },
+    "telegram": {
+      "command": "docker",
+      "args": ["run", "--rm", "-i", "--env-file", "/path/to/project/.env.telegram", "telegram-mcp-server:latest"]
+    }
+  }
+}
+```
+
+## 🎓 For Primes & Zooms
+
+Perfect for managing social media across platforms:
+1. Set up once with docker-compose
+2. Post consistently with simple tool calls
+3. Manage engagement and comments
+4. Never worry about breaking your setup
+
+## 📝 License
+
+MIT License - See LICENSE for details.
+
+## 🤝 Contributing
+
+Issues and PRs welcome!

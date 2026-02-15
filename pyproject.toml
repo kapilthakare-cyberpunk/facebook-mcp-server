@@ -16,3 +16,12 @@ build-backend = "hatchling.build"
 
 [project.scripts]
 facebook-mcp-server = "facebook_mcp_server:main"
+linkedin-mcp-server = "linkedin_mcp_server:run"
+telegram-mcp-server = "telegram_mcp_server:run"
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "src/facebook_mcp_server",
+    "src/linkedin_mcp_server",
+    "src/telegram_mcp_server",
+]

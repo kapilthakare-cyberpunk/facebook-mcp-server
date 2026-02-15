@@ -1,0 +1,19 @@
+FROM python:3.13-slim
+
+WORKDIR /app
+
+ENV PYTHONUNBUFFERED=1
+
+RUN pip install --no-cache-dir uv
+
+# Copy dependency manifests and README first for caching
+COPY pyproject.toml uv.lock README.md ./
+
+# Copy the full source BEFORE running uv sync
+COPY src ./src
+
+# Install dependencies with the project itself (no editable install)
+RUN uv sync --frozen --no-dev --no-editable
+
+# Default command
+CMD ["uv", "run", "linkedin-mcp-server"]

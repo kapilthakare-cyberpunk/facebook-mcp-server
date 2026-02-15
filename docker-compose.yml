@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  facebook:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: facebook-mcp-server:latest
+    container_name: facebook-mcp
+    restart: unless-stopped
+    env_file:
+      - .env.facebook
+    volumes:
+      # Persist config/session data if needed in future
+      - facebook-data:/app/data
+    stdin_open: true
+    tty: true
+
+  linkedin:
+    build:
+      context: .
+      dockerfile: Dockerfile.linkedin
+    image: linkedin-mcp-server:latest
+    container_name: linkedin-mcp
+    restart: unless-stopped
+    env_file:
+      - .env.linkedin
+    volumes:
+      - linkedin-data:/app/data
+    stdin_open: true
+    tty: true
+
+  telegram:
+    build:
+      context: .
+      dockerfile: Dockerfile.telegram
+    image: telegram-mcp-server:latest
+    container_name: telegram-mcp
+    restart: unless-stopped
+    env_file:
+      - .env.telegram
+    volumes:
+      - telegram-data:/app/data
+    stdin_open: true
+    tty: true
+
+volumes:
+  facebook-data:
+  linkedin-data:
+  telegram-data:

@@ -1,0 +1,1 @@
+https://oms.primesandzooms.com/pnz_internal/index.php?-table=orders&-action=email_monthly_summaries&-start_date=2025-11-01&-end_date=2025-11-308&-send_email=0
